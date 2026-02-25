@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserRestController.class)
@@ -49,11 +50,12 @@ class UserRestControllerTest {
 
     @MethodSource("provideInvalidPostDTO")
     @ParameterizedTest
-    void when_post_user_with_invalid_body_expect_status_badRequest(UserPostRequestDTO dto) throws Exception {
+    void when_post_user_with_invalid_body_expect_status_unprocessableEntity(UserPostRequestDTO dto) throws Exception {
         mockMvc.perform(post("/users")
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(dto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("errors.body").isArray());
     }
 
     @Test

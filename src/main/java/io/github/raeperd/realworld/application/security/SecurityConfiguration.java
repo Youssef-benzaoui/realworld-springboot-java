@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+
 import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -32,7 +34,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(POST, "/users", "/users/login");
+        web.ignoring()
+                .antMatchers(POST, "/users", "/users/login")
+                .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html");
     }
 
     @Override
@@ -42,6 +46,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         http.formLogin().disable();
         http.logout().disable();
         http.addFilterBefore(new JWTAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.headers().referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER).and().contentSecurityPolicy("default-src 'none'");
         http.authorizeRequests()
                 .antMatchers(GET, "/profiles/*").permitAll()
                 .antMatchers(GET, "/articles/**").permitAll()

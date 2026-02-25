@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptySet;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WithMockJWTUser
@@ -36,11 +37,12 @@ class ArticleRestControllerTest {
 
     @MethodSource("provideInvalidPostDTO")
     @ParameterizedTest
-    void when_post_article_with_invalid_body_expect_status_badRequest(ArticlePostRequestDTO invalidDTO) throws Exception {
+    void when_post_article_with_invalid_body_expect_status_unprocessableEntity(ArticlePostRequestDTO invalidDTO) throws Exception {
         mockMvc.perform(post("/articles")
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDTO)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("errors.body").isArray());
     }
 
     private static Stream<Arguments> provideInvalidPostDTO() {
